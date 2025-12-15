@@ -1,10 +1,10 @@
 {
   "sites": [
     {
-      "name": "Example",
-      "url": "https://example.com",
-      "description": "An example website",
-      "tags": ["example"]
+      "name": "I2P",
+      "url": "http://i2p.i2p",
+      "description": "I2P website",
+      "tags": ["I2P "]
     }
   ]
 }
