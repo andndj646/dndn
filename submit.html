@@ -18,6 +18,7 @@
     .checkbox-item { display: inline-block; margin-right: 12px; }
     button { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1.1rem; margin-top: 24px; cursor: pointer; }
     button:hover { opacity: 0.9; }
+    #output { margin-top: 20px; background: var(--card); padding: 16px; border-radius: 8px; white-space: pre-wrap; font-family: monospace; }
     .back { display: block; text-align: center; margin-top: 20px; color: var(--primary); text-decoration: none; }
   </style>
 </head>
@@ -36,38 +37,29 @@
     <label>Type</label>
     <div class="checkbox-group">
       <label class="checkbox-item">
-        <input type="checkbox" id="isI2P"> .i2p website (requires I2P router)
+        <input type="checkbox" id="isI2P"> .i2p website
       </label>
     </div>
 
     <label for="tags">Tags (comma separated)</label>
-    <input type="text" id="tags" placeholder="e.g. news, privacy, forum">
+    <input type="text" id="tags" placeholder="e.g. news, privacy">
 
-    <button type="submit" id="submitBtn">📤 Submit for Review</button>
+    <button type="submit" id="generateBtn">📋 Generate Submission</button>
   </form>
+
+  <div id="output" style="display:none;"></div>
   <a href="/" class="back" id="backBtn">← Back to Search</a>
 
   <script>
-    // 简易多语言（与 index.html 一致）
     const translations = {
-      en: {
-        title: "Submit a New Website",
-        submitBtn: "📤 Submit for Review",
-        backBtn: "← Back to Search"
-      },
-      zh: {
-        title: "提交新网站",
-        submitBtn: "📤 提交审核",
-        backBtn: "← 返回搜索"
-      }
+      en: { title: "Submit a New Website", backBtn: "← Back to Search" },
+      zh: { title: "提交新网站", backBtn: "← 返回搜索" }
     };
-
     const lang = localStorage.getItem('lang') || (navigator.language.startsWith('zh') ? 'zh' : 'en');
     document.getElementById('title').textContent = translations[lang].title;
-    document.getElementById('submitBtn').textContent = translations[lang].submitBtn;
     document.getElementById('backBtn').textContent = translations[lang].backBtn;
 
-    document.getElementById('submitForm').addEventListener('submit', async (e) => {
+    document.getElementById('submitForm').addEventListener('submit', (e) => {
       e.preventDefault();
       
       const isI2P = document.getElementById('isI2P').checked;
@@ -77,31 +69,24 @@
         tags = tags.concat(document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t));
       }
 
-      const data = {
-        name: document.getElementById('name').value,
-        url: document.getElementById('url').value,
-        description: document.getElementById('description').value,
-        tags: tags,
-        submitted_at: new Date().toISOString()
-      };
+      const md = `## New Website Submission
 
-      try {
-        const res = await fetch('/api/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
+- **Name**: ${document.getElementById('name').value}
+- **URL**: ${document.getElementById('url').value}
+- **Description**: ${document.getElementById('description').value}
+- **Tags**: ${tags.join(', ') || 'none'}
 
-        if (res.ok) {
-          alert(lang === 'zh' ? '✅ 提交成功！审核后将展示。' : '✅ Submitted! It will appear after review.');
-          document.getElementById('submitForm').reset();
-          document.getElementById('isI2P').checked = false;
-        } else {
-          alert(lang === 'zh' ? '❌ 提交失败' : '❌ Failed to submit');
-        }
-      } catch (err) {
-        alert(lang === 'zh' ? '⚠️ 无法连接服务器' : '⚠️ Could not connect to server');
-      }
+> Please review and add to \`sites.json\`.
+`;
+
+      const outputEl = document.getElementById('output');
+      outputEl.textContent = md;
+      outputEl.style.display = 'block';
+      
+      // 自动复制
+      navigator.clipboard.writeText(md).then(() => {
+        alert(lang === 'zh' ? '✅ 已复制！请粘贴到 GitHub Issue 中提交。' : '✅ Copied! Please paste into a GitHub Issue.');
+      });
     });
   </script>
 </body>
