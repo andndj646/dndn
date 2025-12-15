@@ -1,25 +1,10 @@
 {
-  "version": 2,
-  "last_updated": "2025-12-15T18:00:00Z",
   "sites": [
     {
-      "name": "I2P Official",
-      "url": "http://i2p.i2p",
-      "description": "Official I2P project homepage",
-      "tags": ["i2p", "official"],
-      "ratings":    // 模拟已有评分
-    },
-    {
-      "name": "Privacy Guide",
-      "url": "https://privacyguides.org",
-      "description": "Comprehensive privacy tools and guides",
-      "tags": ["privacy", "guide"]
-    }
-    {
-      "name": "I2P",
-      "url": "https://beta.i2p.net/en/feedback/",
-      "description": "I2PWEB",
-      "tags": ["privacy", "guide"]
+      "name": "Example",
+      "url": "https://example.com",
+      "description": "An example website",
+      "tags": ["example"]
     }
   ]
 }
