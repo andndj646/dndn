@@ -1,143 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🌐 Community Search</title>
-  <style>
-    :root {
-      --bg: #ffffff; --text: #1a202c; --muted: #718096;
-      --card: #f8fafc; --border: #e2e8f0; --primary: #4299e1;
-      --success: #48bb78; --warning: #ed8936; --danger: #e53e3e;
-      --i2p: #8b5cf6;
-      --shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #121212; --text: #e2e8f0; --muted: #a0aec0;
-        --card: #1e1e1e; --border: #2d3748; --shadow: 0 4px 12px rgba(0,0,0,0.2);
-      }
-    }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
-      background: var(--bg); color: var(--text); line-height:1.6;
-      padding: 16px; max-width: 800px; margin: 0 auto;
-    }
-    header { text-align:center; margin:24px 0; }
-    h1 { font-size:2rem; margin-bottom:8px; 
-         background:linear-gradient(90deg, var(--primary), #805ad5);
-         -webkit-background-clip:text; background-clip:text; color:transparent; }
-    .subtitle { color:var(--muted); margin:8px 0 16px; }
-    
-    .lang-switch {
-      position: absolute; top: 16px; right: 16px;
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: 20px; padding: 4px 8px; font-size: 0.9rem;
-    }
-    .lang-btn { background: none; border: none; color: var(--muted); cursor: pointer; }
-    .lang-btn.active { color: var(--primary); font-weight: bold; }
-    
-    .search-box {
-      position:sticky; top:0; background:var(--bg); padding:12px 0;
-      margin:-16px -16px 16px; backdrop-filter:blur(10px); z-index:10;
-    }
-    #q { width:100%; padding:14px; font-size:1rem; border:1px solid var(--border);
-         border-radius:50px; background:var(--card); color:var(--text); outline:none; }
-    
-    .site {
-      background:var(--card); border:1px solid var(--border); border-radius:16px;
-      padding:16px; margin-bottom:16px; box-shadow:var(--shadow);
-      position: relative;
-    }
-    .i2p-badge {
-      position: absolute; top: 12px; right: 12px;
-      background: var(--i2p); color: white; font-size: 0.7rem;
-      padding: 2px 6px; border-radius: 10px; font-weight: bold;
-    }
-    .site h3 { margin-bottom:8px; }
-    .site a { color: var(--primary); text-decoration:none; font-weight:600; }
-    .tags { margin:10px 0; }
-    .tag { display:inline-block; background:rgba(66,153,225,0.15); color:var(--primary);
-           padding:4px 10px; border-radius:20px; font-size:0.85rem; margin-right:6px; }
-    .url { color:var(--muted); font-size:0.85rem; word-break:break-all; }
-    
-    .rating {
-      margin: 10px 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .stars {
-      color: #fbbf24;
-      font-size: 1.2rem;
-    }
-    .user-rating {
-      margin-left: 12px;
-      font-size: 0.9rem;
-      color: var(--primary);
-    }
-    
-    .submit-btn {
-      display: inline-block; background: var(--primary); color: white;
-      padding: 8px 20px; border-radius: 24px; text-decoration: none;
-      font-weight: 600; margin: 16px 0; transition: opacity 0.2s;
-    }
-    .submit-btn:hover { opacity: 0.9; }
-    
-    .empty { text-align:center; padding:40px 0; color:var(--muted); }
-    footer { text-align:center; margin-top:32px; padding-top:16px; 
-             border-top:1px solid var(--border); color:var(--muted); font-size:0.85rem; }
-    
-    @media (max-width:600px) {
-      body { padding:12px; }
-      h1 { font-size:1.6rem; }
-      .site { padding:14px; }
-    }
-  </style>
-</head>
-<body>
-  <div class="lang-switch">
-    <button class="lang-btn" data-lang="zh">中文</button>
-    <button class="lang-btn" data-lang="en">English</button>
-  </div>
-
-  <header>
-    <h1 id="title">Community Search</h1>
-    <p class="subtitle" id="subtitle">Search • Rate • Submit</p>
-    <a href="submit.html" class="submit-btn" id="addBtn">➕ Add a Website</a>
-  </header>
-
-  <div class="search-box">
-    <input type="text" id="q" placeholder="Search by name, tag or description..." autofocus />
-  </div>
-
-  <div id="status">Loading...</div>
-  <div id="results"></div>
-
-  <footer>
-    <p>⭐ Rate websites • 🌐 Includes .i2p sites</p>
-    <p>Data updated manually via GitHub</p>
-  </footer>
-
-  <script>
-    // ========== 多语言 ==========
-    const translations = {
-      en: {
-        title: "Community Search",
-        subtitle: "Search • Rate • Submit",
-        addBtn: "➕ Add a Website",
-        searchPlaceholder: "Search by name, tag or description...",
-        loading: "Loading...",
-        noData: "No data.",
-        noResults: "No results found.",
-        yourRating: "Your rating: {stars} ★"
-      },
-      zh: {
-        title: "社区搜索引擎",
-        subtitle: "搜索 • 评分 • 提交",
-        addBtn: "➕ 添加网站",
-        searchPlaceholder: "按名称、标签或描述搜索...",
-        loading: "加载中...",
-        noData: "无数据。",
-        noResults
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>Search</title><style>
+:root{--b:#fff;--t:#1a202c;--m:#718096;--c:#f8fafc;--p:#4299e1;--i:#8b5cf6}
+@media (prefers-color-scheme:dark){:root{--b:#121212;--t:#e2e8f0;--m:#a0aec0;--c:#1e1e1e}}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:sans-serif;background:var(--b);color:var(--t);padding:16px;max-width:800px;margin:auto}
+.lang{position:absolute;top:0;right:0}.lang button{background:var(--c);border:1px solid #ddd;padding:2px 6px;font-size:.9em}
+#q{width:100%;padding:12px;border:1px solid #ddd;border-radius:24px;background:var(--c);color:var(--t);margin:0 0 20px}
+.site{background:var(--c);border:1px solid #ddd;padding:14px;margin:12px 0;border-radius:12px;position:relative}
+.i2p{position:absolute;top:8px;right:8px;background:var(--i);color:#fff;font-size:.7em;padding:1px 5px;border-radius:8px}
+.domain{color:var(--m);font-size:.9em;margin:4px 0;font-family:monospace}
+.tag{background:rgba(66,153,225,.2);color:var(--p);padding:2px 8px;border-radius:12px;font-size:.85em;margin-right:6px}
+.rating span{cursor:pointer;color:#cbd5e0;margin-right:3px}.rating .on{color:#fbbf24}
+</style></head><body>
+<div class="lang"><button data-l="zh">中文</button><button data-l="en">EN</button></div>
+<input id="q" placeholder="Search name, domain or description..." autofocus>
+<div id="r">Loading...</div>
+<script>
+let L=localStorage.lang||(navigator.language.startsWith('zh')?'zh':'en'),T=L=='zh'?{p:"搜索...",n:"无结果"}:{p:"Search...",n:"No results"};
+document.querySelector(`[data-l="${L}"]`).style.fontWeight='bold';document.getElementById('q').placeholder=T.p;
+const D=u=>{try{return new URL(u.startsWith('http')?u:'http://'+u).hostname}catch{return u}},R=u=>parseInt(localStorage['r_'+btoa(u)])||0,S=(u,s)=>{localStorage['r_'+btoa(u)]=s;X()},X=(q='')=>{
+fetch('sites.json?t='+Date.now()).then(r=>r.json()).then(d=>{window.SITES=d.sites||[];render(q)}).catch(()=>document.getElementById('r').innerHTML='<div>No data</div>')},render=(q)=>{
+const f=q?window.SITES.filter(s=>s.name.toLowerCase().includes(q)||D(s.url).toLowerCase().includes(q)||s.description.toLowerCase().includes(q)):window.SITES;
+document.getElementById('r').innerHTML=f.length?f.map(s=>{
+const d=D(s.url),i=d.endsWith('.i2p')||(s.tags||[]).includes('i2p'),u=R(s.url),a=s.ratings?.length?(s.ratings.reduce((x,y)=>x+y)/s.ratings.length).toFixed(1):0;
+return `<div class="site">${i?'<div class="i2p">.i2p</div>':''}<h3><a href="${s.url}" target="_blank">${s.name}</a></h3><div class="domain">${d}</div><div>${s.description}</div>${
+(s.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}<div class="rating">${
+Array(5).fill().map((_,i)=>`<span onclick="S('${s.url.replace(/'/g,"\\\\'")}',${i+1})" class="${i+1<=u?'on':''}">★</span>`).join('')}</div></div>`}).join(''):T.n;};
+X();document.getElementById('q').addEventListener('input',e=>render(e.target.value.toLowerCase()));window.S=S;
+</script></body></html>
