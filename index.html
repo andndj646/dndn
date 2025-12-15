@@ -1,30 +1,41 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-<title>Search</title><style>
+<title>Directory</title><style>
 :root{--b:#fff;--t:#1a202c;--m:#718096;--c:#f8fafc;--p:#4299e1;--i:#8b5cf6}
 @media (prefers-color-scheme:dark){:root{--b:#121212;--t:#e2e8f0;--m:#a0aec0;--c:#1e1e1e}}
-*{box-sizing:border-box;margin:0;padding:0}body{font-family:sans-serif;background:var(--b);color:var(--t);padding:16px;max-width:800px;margin:auto}
-.lang{position:absolute;top:0;right:0}.lang button{background:var(--c);border:1px solid #ddd;padding:2px 6px;font-size:.9em}
-#q{width:100%;padding:12px;border:1px solid #ddd;border-radius:24px;background:var(--c);color:var(--t);margin:0 0 20px}
-.site{background:var(--c);border:1px solid #ddd;padding:14px;margin:12px 0;border-radius:12px;position:relative}
-.i2p{position:absolute;top:8px;right:8px;background:var(--i);color:#fff;font-size:.7em;padding:1px 5px;border-radius:8px}
-.domain{color:var(--m);font-size:.9em;margin:4px 0;font-family:monospace}
-.tag{background:rgba(66,153,225,.2);color:var(--p);padding:2px 8px;border-radius:12px;font-size:.85em;margin-right:6px}
-.rating span{cursor:pointer;color:#cbd5e0;margin-right:3px}.rating .on{color:#fbbf24}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:sans-serif;background:var(--b);color:var(--t);padding:16px;max-width:800px;margin:auto;line-height:1.5}
+.lang{position:absolute;top:12px;right:12px}.lang button{background:var(--c);border:1px solid #ddd;padding:2px 6px;font-size:.9em}
+.site{background:var(--c);border:1px solid #ddd;padding:16px;margin:16px 0;border-radius:12px;position:relative}
+.i2p{position:absolute;top:12px;right:12px;background:var(--i);color:#fff;font-size:.75em;padding:2px 6px;border-radius:10px;font-weight:bold}
+.domain{color:var(--m);font-size:.95em;font-family:monospace;margin:6px 0}
+.tags{margin:8px 0}.tag{display:inline-block;background:rgba(66,153,225,.2);color:var(--p);padding:2px 8px;border-radius:12px;font-size:.85em;margin-right:6px}
+.rating span{cursor:pointer;color:#cbd5e0;margin-right:4px}.rating .on{color:#fbbf24}
 </style></head><body>
 <div class="lang"><button data-l="zh">中文</button><button data-l="en">EN</button></div>
-<input id="q" placeholder="Search name, domain or description..." autofocus>
+<h1 style="text-align:center;margin:24px 0">Community Directory</h1>
 <div id="r">Loading...</div>
 <script>
-let L=localStorage.lang||(navigator.language.startsWith('zh')?'zh':'en'),T=L=='zh'?{p:"搜索...",n:"无结果"}:{p:"Search...",n:"No results"};
-document.querySelector(`[data-l="${L}"]`).style.fontWeight='bold';document.getElementById('q').placeholder=T.p;
-const D=u=>{try{return new URL(u.startsWith('http')?u:'http://'+u).hostname}catch{return u}},R=u=>parseInt(localStorage['r_'+btoa(u)])||0,S=(u,s)=>{localStorage['r_'+btoa(u)]=s;X()},X=(q='')=>{
-fetch('sites.json?t='+Date.now()).then(r=>r.json()).then(d=>{window.SITES=d.sites||[];render(q)}).catch(()=>document.getElementById('r').innerHTML='<div>No data</div>')},render=(q)=>{
-const f=q?window.SITES.filter(s=>s.name.toLowerCase().includes(q)||D(s.url).toLowerCase().includes(q)||s.description.toLowerCase().includes(q)):window.SITES;
-document.getElementById('r').innerHTML=f.length?f.map(s=>{
-const d=D(s.url),i=d.endsWith('.i2p')||(s.tags||[]).includes('i2p'),u=R(s.url),a=s.ratings?.length?(s.ratings.reduce((x,y)=>x+y)/s.ratings.length).toFixed(1):0;
-return `<div class="site">${i?'<div class="i2p">.i2p</div>':''}<h3><a href="${s.url}" target="_blank">${s.name}</a></h3><div class="domain">${d}</div><div>${s.description}</div>${
-(s.tags||[]).map(t=>`<span class="tag">${t}</span>`).join('')}<div class="rating">${
-Array(5).fill().map((_,i)=>`<span onclick="S('${s.url.replace(/'/g,"\\\\'")}',${i+1})" class="${i+1<=u?'on':''}">★</span>`).join('')}</div></div>`}).join(''):T.n;};
-X();document.getElementById('q').addEventListener('input',e=>render(e.target.value.toLowerCase()));window.S=S;
+let L=localStorage.lang||(navigator.language.startsWith('zh')?'zh':'en');
+document.querySelector(`[data-l="${L}"]`).style.fontWeight='bold';
+const D=u=>{try{return new URL(u.startsWith('http')?u:'http://'+u).hostname}catch{return u.split('/')}};
+const R=u=>parseInt(localStorage['rate_'+btoa(u)])||0;
+const S=(u,s)=>{localStorage['rate_'+btoa(u)]=s;render()};
+let sites=[];
+const render=()=>{
+  const t=L=='zh'?{desc:"提示词：",cat:"类别："}:{desc:"Description: ",cat:"Categories: "};
+  document.getElementById('r').innerHTML=sites.map(s=>{
+    const d=D(s.url), isI2P=d.endsWith('.i2p')||(s.tags||[]).includes('i2p'), ur=R(s.url);
+    return `<div class="site">${isI2P?'<div class="i2p">.i2p</div>':''}
+      <h2><a href="${s.url}" target="_blank" style="color:var(--p);text-decoration:none">${s.name}</a></h2>
+      <div class="domain">${d}</div>
+      <div><strong>${t.desc}</strong>${s.description||''}</div>
+      <div class="tags"><strong>${t.cat}</strong>${(s.tags||[]).map(tag=>`<span class="tag">${tag}</span>`).join('')}</div>
+      <div class="rating">${Array(5).fill().map((_,i)=>
+        `<span onclick="S('${s.url.replace(/'/g,"\\\\'")}',${i+1})" class="${i+1<=ur?'on':''}">★</span>`
+      ).join('')}</div>
+    </div>`;
+  }).join('');
+};
+fetch('sites.json?t='+Date.now()).then(r=>r.json()).then(d=>{sites=d.sites||[];render()}).catch(()=>document.getElementById('r').innerHTML='<div>Load failed.</div>');
+window.S=S;
 </script></body></html>
