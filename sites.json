@@ -7,16 +7,11 @@
       "description": "I2P website",
       "tags": ["I2P "]
     }
-  ]
-}
-
-{
-  "sites": [
-    {
+       {
       "name": "calc",
       "url": "http://calc.i2p/",
       "description": "calc",
-      "tags":
-    }
+      "tags": ["I2P "]
+       }
   ]
 }
