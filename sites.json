@@ -1,3 +1,4 @@
+
 {
   "sites": [
     {
@@ -5,6 +6,17 @@
       "url": "http://i2p.i2p",
       "description": "I2P website",
       "tags": ["I2P "]
+    }
+  ]
+}
+
+{
+  "sites": [
+    {
+      "name": "calc",
+      "url": "http://calc.i2p/",
+      "description": "calc",
+      "tags":
     }
   ]
 }
