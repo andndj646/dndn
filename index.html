@@ -7,39 +7,42 @@
 <div id="r">Loading...</div>
 <script>
 let currentPage = 0, SITES_PER_PAGE = 10, sites = [];
-const D = u => { try { return new URL(u.startsWith('http') ? u : 'http://' + u).hostname } catch { return u } };
+const D = u => { try { return new URL(u.startsWith('http') ? u : 'http://' + u).hostname; } catch { return u; } };
 const getRating = u => parseInt(localStorage['rate_' + btoa(u)]) || 0;
 const setRating = (u, s) => { localStorage['rate_' + btoa(u)] = s; render(); };
-const isI2P = s => {
-  const d = D(s.url);
-  return d.endsWith('.i2p') || (s.tags || []).some(t => t.toLowerCase().includes('i2p'));
-};
+const isI2P = s => D(s.url).endsWith('.i2p') || (s.tags || []).some(t => t.toLowerCase().includes('i2p'));
+const escapeQuote = str => str.replace(/'/g, "\\'");
 const render = () => {
   const start = currentPage * SITES_PER_PAGE;
   const pageSites = sites.slice(start, start + SITES_PER_PAGE);
-  const siteHTML = pageSites.map(s => {
+  let siteHTML = '';
+  for (let s of pageSites) {
     const d = D(s.url), r = getRating(s.url);
-    return `<div class="site">${isI2P(s)?'<div class="i2p">.i2p</div>':''}
-      <h2><a href="${s.url}" target="_blank" style="color:var(--p);text-decoration:none">${s.name}</a></h2>
-      <div class="domain">${d}</div>
-      <div><strong>Description: </strong>${s.description || ''}</div>
-      <div class="tags"><strong>Tags: </strong>${(s.tags || []).map(t => \`<span class="tag">\${t.trim()}</span>\`).join('')}</div>
-      <div class="rating">${Array(5).fill().map((_,i) => \`<span onclick="setRating('\${s.url.replace(/'/g,"\\\\'")}',\${i+1})" class="\${i+1<=r?'on':''}">★</span>\`).join('')}</div>
-    </div>`;
-  }).join('');
+    const tagsHtml = (s.tags || []).map(t => '<span class="tag">' + t.trim() + '</span>').join('');
+    const stars = Array.from({length:5}, (_,i) => 
+      '<span onclick="setRating(\'' + escapeQuote(s.url) + '\',' + (i+1) + ')" class="' + (i+1 <= r ? 'on' : '') + '">★</span>'
+    ).join('');
+    siteHTML += '<div class="site">' + (isI2P(s) ? '<div class="i2p">.i2p</div>' : '') +
+      '<h2><a href="' + s.url + '" target="_blank" style="color:var(--p);text-decoration:none">' + s.name + '</a></h2>' +
+      '<div class="domain">' + d + '</div>' +
+      '<div><strong>Description: </strong>' + (s.description || '') + '</div>' +
+      '<div class="tags"><strong>Tags: </strong>' + tagsHtml + '</div>' +
+      '<div class="rating">' + stars + '</div></div>';
+  }
   const totalPages = Math.ceil(sites.length / SITES_PER_PAGE);
-  const nav = totalPages > 1 ? 
-    `<div style="text-align:center;margin-top:24px;padding-top:16px;border-top:1px solid #eee">
-      ${Array.from({length: totalPages}, (_, i) => 
-        \`<button onclick="currentPage=\${i};render()" style="margin:0 4px;background:\${i===currentPage?'var(--p)':'transparent'};color:\${i===currentPage?'#fff':'var(--t)'};border:1px solid var(--p);padding:4px 8px;border-radius:4px;cursor:pointer">\${i+1}</button>\`
-      ).join('')}
-    </div>` : '';
+  let nav = '';
+  if (totalPages > 1) {
+    let btns = '';
+    for (let i = 0; i < totalPages; i++) {
+      const active = i === currentPage ? 'var(--p)' : 'transparent';
+      const color = i === currentPage ? '#fff' : 'var(--t)';
+      btns += '<button onclick="currentPage=' + i + ';render()" style="margin:0 4px;background:' + active + ';color:' + color + ';border:1px solid var(--p);padding:4px 8px;border-radius:4px;cursor:pointer">' + (i + 1) + '</button>';
+    }
+    nav = '<div style="text-align:center;margin-top:24px;padding-top:16px;border-top:1px solid #eee">' + btns + '</div>';
+  }
   document.getElementById('r').innerHTML = siteHTML + nav;
 };
-fetch('sites.json?t=' + Date.now())
-  .then(r => r.json())
-  .then(d => { sites = d.sites || []; currentPage = 0; render(); })
-  .catch(() => document.getElementById('r').innerHTML = '<div style="text-align:center;color:red">Failed to load sites.json</div>');
+fetch('sites.json?t=' + Date.now()).then(r => r.json()).then(d => { sites = d.sites || []; currentPage = 0; render(); }).catch(() => document.getElementById('r').innerHTML = '<div style="text-align:center;color:red">Failed to load sites.json</div>');
 window.setRating = setRating;
 </script>
 </body></html>
