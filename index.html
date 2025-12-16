@@ -1,41 +1,45 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
-<title>Directory</title><style>
-:root{--b:#fff;--t:#1a202c;--m:#718096;--c:#f8fafc;--p:#4299e1;--i:#8b5cf6}
-@media (prefers-color-scheme:dark){:root{--b:#121212;--t:#e2e8f0;--m:#a0aec0;--c:#1e1e1e}}
-*{box-sizing:border-box;margin:0;padding:0}body{font-family:sans-serif;background:var(--b);color:var(--t);padding:16px;max-width:800px;margin:auto;line-height:1.5}
-.lang{position:absolute;top:12px;right:12px}.lang button{background:var(--c);border:1px solid #ddd;padding:2px 6px;font-size:.9em}
-.site{background:var(--c);border:1px solid #ddd;padding:16px;margin:16px 0;border-radius:12px;position:relative}
-.i2p{position:absolute;top:12px;right:12px;background:var(--i);color:#fff;font-size:.75em;padding:2px 6px;border-radius:10px;font-weight:bold}
-.domain{color:var(--m);font-size:.95em;font-family:monospace;margin:6px 0}
-.tags{margin:8px 0}.tag{display:inline-block;background:rgba(66,153,225,.2);color:var(--p);padding:2px 8px;border-radius:12px;font-size:.85em;margin-right:6px}
-.rating span{cursor:pointer;color:#cbd5e0;margin-right:4px}.rating .on{color:#fbbf24}
-</style></head><body>
-<div class="lang"><button data-l="zh">中文</button><button data-l="en">EN</button></div>
+<title>Community Directory</title>
+<style>:root{--b:#fff;--t:#1a202c;--m:#718096;--c:#f8fafc;--p:#4299e1;--i:#8b5cf6}@media (prefers-color-scheme:dark){:root{--b:#121212;--t:#e2e8f0;--m:#a0aec0;--c:#1e1e1e}}*{box-sizing:border-box;margin:0;padding:0}body{font-family:sans-serif;background:var(--b);color:var(--t);padding:16px;max-width:800px;margin:auto;line-height:1.5}.site{background:var(--c);border:1px solid #ddd;padding:16px;margin:16px 0;border-radius:12px;position:relative}.i2p{position:absolute;top:12px;right:12px;background:var(--i);color:#fff;font-size:.75em;padding:2px 6px;border-radius:10px;font-weight:bold}.domain{color:var(--m);font-size:.95em;font-family:monospace;margin:6px 0}.tags{margin:8px 0}.tag{display:inline-block;background:rgba(66,153,225,.2);color:var(--p);padding:2px 8px;border-radius:12px;font-size:.85em;margin-right:6px}.rating span{cursor:pointer;color:#cbd5e0;margin-right:4px}.rating .on{color:#fbbf24}</style>
+</head><body>
 <h1 style="text-align:center;margin:24px 0">Community Directory</h1>
 <div id="r">Loading...</div>
 <script>
-let L=localStorage.lang||(navigator.language.startsWith('zh')?'zh':'en');
-document.querySelector(`[data-l="${L}"]`).style.fontWeight='bold';
-const D=u=>{try{return new URL(u.startsWith('http')?u:'http://'+u).hostname}catch{return u.split('/')}};
-const R=u=>parseInt(localStorage['rate_'+btoa(u)])||0;
-const S=(u,s)=>{localStorage['rate_'+btoa(u)]=s;render()};
-let sites=[];
-const render=()=>{
-  const t=L=='zh'?{desc:"提示词：",cat:"类别："}:{desc:"Description: ",cat:"Categories: "};
-  document.getElementById('r').innerHTML=sites.map(s=>{
-    const d=D(s.url), isI2P=d.endsWith('.i2p')||(s.tags||[]).includes('i2p'), ur=R(s.url);
-    return `<div class="site">${isI2P?'<div class="i2p">.i2p</div>':''}
+let currentPage = 0, SITES_PER_PAGE = 10, sites = [];
+const D = u => { try { return new URL(u.startsWith('http') ? u : 'http://' + u).hostname } catch { return u } };
+const getRating = u => parseInt(localStorage['rate_' + btoa(u)]) || 0;
+const setRating = (u, s) => { localStorage['rate_' + btoa(u)] = s; render(); };
+const isI2P = s => {
+  const d = D(s.url);
+  return d.endsWith('.i2p') || (s.tags || []).some(t => t.toLowerCase().includes('i2p'));
+};
+const render = () => {
+  const start = currentPage * SITES_PER_PAGE;
+  const pageSites = sites.slice(start, start + SITES_PER_PAGE);
+  const siteHTML = pageSites.map(s => {
+    const d = D(s.url), r = getRating(s.url);
+    return `<div class="site">${isI2P(s)?'<div class="i2p">.i2p</div>':''}
       <h2><a href="${s.url}" target="_blank" style="color:var(--p);text-decoration:none">${s.name}</a></h2>
       <div class="domain">${d}</div>
-      <div><strong>${t.desc}</strong>${s.description||''}</div>
-      <div class="tags"><strong>${t.cat}</strong>${(s.tags||[]).map(tag=>`<span class="tag">${tag}</span>`).join('')}</div>
-      <div class="rating">${Array(5).fill().map((_,i)=>
-        `<span onclick="S('${s.url.replace(/'/g,"\\\\'")}',${i+1})" class="${i+1<=ur?'on':''}">★</span>`
-      ).join('')}</div>
+      <div><strong>Description: </strong>${s.description || ''}</div>
+      <div class="tags"><strong>Tags: </strong>${(s.tags || []).map(t => \`<span class="tag">\${t.trim()}</span>\`).join('')}</div>
+      <div class="rating">${Array(5).fill().map((_,i) => \`<span onclick="setRating('\${s.url.replace(/'/g,"\\\\'")}',\${i+1})" class="\${i+1<=r?'on':''}">★</span>\`).join('')}</div>
     </div>`;
   }).join('');
+  const totalPages = Math.ceil(sites.length / SITES_PER_PAGE);
+  const nav = totalPages > 1 ? 
+    `<div style="text-align:center;margin-top:24px;padding-top:16px;border-top:1px solid #eee">
+      ${Array.from({length: totalPages}, (_, i) => 
+        \`<button onclick="currentPage=\${i};render()" style="margin:0 4px;background:\${i===currentPage?'var(--p)':'transparent'};color:\${i===currentPage?'#fff':'var(--t)'};border:1px solid var(--p);padding:4px 8px;border-radius:4px;cursor:pointer">\${i+1}</button>\`
+      ).join('')}
+    </div>` : '';
+  document.getElementById('r').innerHTML = siteHTML + nav;
 };
-fetch('sites.json?t='+Date.now()).then(r=>r.json()).then(d=>{sites=d.sites||[];render()}).catch(()=>document.getElementById('r').innerHTML='<div>Load failed.</div>');
-window.S=S;
-</script></body></html>
+fetch('sites.json?t=' + Date.now())
+  .then(r => r.json())
+  .then(d => { sites = d.sites || []; currentPage = 0; render(); })
+  .catch(() => document.getElementById('r').innerHTML = '<div style="text-align:center;color:red">Failed to load sites.json</div>');
+window.setRating = setRating;
+</script>
+</body></html>
