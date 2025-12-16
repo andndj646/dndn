@@ -1,17 +1,16 @@
-
 {
   "sites": [
     {
       "name": "I2P",
       "url": "http://i2p.i2p",
       "description": "I2P website",
-      "tags": ["I2P "]
-    }
-       {
+      "tags": ["I2P"]
+    },
+    {
       "name": "calc",
       "url": "http://calc.i2p/",
       "description": "calc",
-      "tags": ["I2P "]
-       }
+      "tags": ["I2P"]
+    }
   ]
 }
